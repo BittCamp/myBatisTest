@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userSQL"> <!-- xml에서 실행하면 .out.xml파일이 생성되서  실행안된다. 지워야되.-->
+	<!-- DTO의 필드명과 테이블의 컬럼명이 틀리면 강제로 매핑을 해준다. 현업에서 소스 개판으로 짠경우 이렇게 강제 매핑시켜서 결과보여주게도 함.-->
+	<resultMap type="user" id="userResult"><!--user.bean.UserDTO  -->
+		<result column="Name" property="name"/><!-- <result column="테이블의 컬럼명" property="필드명"/> -->
+		<result column="ID" property="id"/>
+		<result column="PWD" property="pwd"/>
+	</resultMap>
+	
+	<!-- 등록 -->
+	<insert id="write" parameterType="user"> <!-- user.bean.UserDTO  -->
+		insert into usertable values(#{name},#{id},#{pwd})
+	</insert>
+	<!-- 출력 -->
+	<select id="getUserList" resultMap="userResult">
+		select * from usertable		
+	</select>
+	<!-- 1건 출력 -->
+	<select id="getUser" parameterType="java.lang.String" resultType="user"><!-- String 타입 들어온다. parameterType="java.lang.String" -->
+		select * from usertable	where id = #{id}	
+	</select>
+	<!-- 수정 -->
+	<update id="update" parameterType="user">
+		update usertable set name =#{name} , pwd= #{pwd} where id =#{id}	
+	</update>
+	<!-- 삭제 -->
+	<delete id="delete"  parameterType="java.lang.String">
+		delete from usertable where id = #{id}
+	</delete>
+	<!-- 검색 -->
+	<select id="search" parameterType="java.lang.String" resultType="user"> <!-- user.bean.UserDTO  -->
+			select * from usertable where name like '%'||#{name}||'%' or id like '%'||#{id}||'%' 	  		
+	</select>
+	<!-- 검색선생님꺼  parameterType엔 자료형을 써줘야되. -->
+	<select id="search_t" parameterType="java.util.Map" resultType="user"> <!-- user.bean.UserDTO  -->
+			<!--  select * from usertable where
+			<if test="columnName == 'name'">
+				name like '%' || #{value} || '%' 					
+			</if>
+			<if test="columnName == 'id'">
+				id like '%' || #{value} || '%' 	
+			</if>
+			해쉬맵방식-->
+			<!--select * from usertable where
+			<choose>
+				<when test="columnName == 'name'">
+					name like '%' || #{value} || '%' 					
+				</when>
+				<otherwise> 
+					id like '%' || #{value} || '%' 	
+				</otherwise>
+			</choose>
+			-->
+			<!--${columnName} 는 가져온 값에서 따옴표 뺴버리라는 말이다. -->
+			select * from usertable where ${columnName} like '%' || #{value} || '%'
+	</select>
+	
+</mapper>
